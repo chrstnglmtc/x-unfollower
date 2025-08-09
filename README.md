@@ -39,7 +39,7 @@ Until it’s published on the Chrome Web Store, you can load it manually.
 3. **Enable Developer Mode** (toggle in top-right)
 
 4. **Load unpacked**
-   Click **"Load unpacked"** and select the extension folder.
+   Click **"Load unpacked"** and select the extracted folder (x-unfollower-main).
 
 5. You should now see **X Following Manager** in your extensions.
 
