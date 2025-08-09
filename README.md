@@ -3,7 +3,9 @@
 A Chrome Extension to bulk manage your Following list on [x.com](https://x.com).
 You can **load your Following list**, filter by **Not Following Back**, select accounts, and unfollow them in bulk.
 
-⚠️ **Disclaimer**: This extension is for personal use only. Automated actions may be against X’s Terms of Service — use at your own risk.
+⚠️ **Disclaimer**:  
+This extension is for personal use only. Automated actions may violate X’s Terms of Service and could result in restrictions or suspension of your account.  
+**You use this tool entirely at your own risk.** The developer is **not liable** for any loss, damage, or consequences resulting from its use.  
 All processing happens locally in your browser. No data is collected or sent to external servers.
 
 ---
