@@ -33,7 +33,7 @@ Until it’s published on the Chrome Web Store, you can load it manually.
 1. **Download the ZIP file**
    - Go to the GitHub repo: [https://github.com/chrstnglmtc/x-unfollower](https://github.com/chrstnglmtc/x-unfollower)
    - Click **"Code" > "Download ZIP"**
-   - Extract the downloaded ZIP file
+   - No need to extract the ZIP
 
 2. **Open Chrome Extensions page**
    - In Chrome, go to: `chrome://extensions/`
@@ -43,7 +43,7 @@ Until it’s published on the Chrome Web Store, you can load it manually.
 
 4. **Load Unpacked Extension**
    - Click **"Load unpacked"**
-   - Select the extracted folder (e.g., `x-unfollower-main`)
+   - Select the ZIP file (e.g., `x-unfollower-main`)
 
 5. You should now see **** in your extensions.
 
