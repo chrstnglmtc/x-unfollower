@@ -102,7 +102,7 @@ Until it’s published on the Chrome Web Store, you can load it manually.
 > ⚠️ Chrome on mobile **does not** support extensions. You must install and use [**Kiwi Browser**](https://play.google.com/store/apps/details?id=com.kiwibrowser.browser), which allows Chrome extensions on Android.
 
 1. **Install Kiwi Browser**
-   - Download it from the [Google Play Store](https://play.google.com/store/apps/details?id=com.kiwibrowser.browser)
+   - Download it from the Google Play Store
 
 2. **Open [x.com](https://x.com) and go to your Following page**
    - Example: `https://x.com/yourusername/following`
