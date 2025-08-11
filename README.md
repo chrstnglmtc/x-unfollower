@@ -33,7 +33,7 @@ Until it’s published on the Chrome Web Store, you can load it manually.
 1. **Download the ZIP file**
    - Go to the GitHub repo: https://github.com/chrstnglmtc/x-unfollower/tree/v2.0
    - Click **"Code" > "Download ZIP"**
-   - No need to extract the ZIP
+   - Extract the ZIP
 
 2. **Open Chrome Extensions page**
    - In Chrome, go to: `chrome://extensions/`
@@ -43,7 +43,7 @@ Until it’s published on the Chrome Web Store, you can load it manually.
 
 4. **Load Unpacked Extension**
    - Click **"Load unpacked"**
-   - Select the ZIP file (e.g., `x-unfollower-v2.0`)
+   - Select the content of the extracted folder. (e.g., `x-unfollower-v2.0`)
 
 5. You should now see **** in your extensions.
 
