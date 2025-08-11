@@ -1,4 +1,4 @@
-# X Unfollower V1
+# X Unfollower V2
 
 A Chrome Extension to bulk manage your Following list on [x.com](https://x.com).
 You can **load your Following list**, filter by **Not Following Back**, select accounts, and unfollow them in bulk.
@@ -31,7 +31,7 @@ Until it’s published on the Chrome Web Store, you can load it manually.
 ### 💻 For PC (Windows, macOS, Linux)
 
 1. **Download the ZIP file**
-   - Go to the GitHub repo: [https://github.com/chrstnglmtc/x-unfollower](https://github.com/chrstnglmtc/x-unfollower)
+   - Go to the GitHub repo: https://github.com/chrstnglmtc/x-unfollower/tree/v2.0
    - Click **"Code" > "Download ZIP"**
    - No need to extract the ZIP
 
@@ -43,7 +43,7 @@ Until it’s published on the Chrome Web Store, you can load it manually.
 
 4. **Load Unpacked Extension**
    - Click **"Load unpacked"**
-   - Select the ZIP file (e.g., `x-unfollower-main`)
+   - Select the ZIP file (e.g., `x-unfollower-v2.0`)
 
 5. You should now see **** in your extensions.
 
@@ -51,10 +51,10 @@ Until it’s published on the Chrome Web Store, you can load it manually.
 
 ### 📱 For Mobile (Android via Kiwi Browser)
 
-> ⚠️ Chrome on mobile **does not** support extensions. You’ll need to use [**Kiwi Browser**](https://play.google.com/store/apps/details?id=com.kiwibrowser.browser) instead.
+> ⚠️ Chrome on mobile **does not** support extensions. You’ll need to use **Kiwi Browser** instead.
 
 1. **Install Kiwi Browser**
-   - Download it from the [Google Play Store](https://play.google.com/store/apps/details?id=com.kiwibrowser.browser)
+   - Download it here: [**Kiwi Browser**](https://apkpure.com/kiwi-browser-fast-quiet/com.kiwibrowser.browser/download?_gl=1*9gm095*_ga*YW1wLTZTOWxsSkMzUzFTdXgyRHZjQWxtcUdYTnVjdnBhdGJtem9tSHJWWHFHdmVxNXppcW1reTk2Yi1YTFd4aWZaU0g)
 
 2. **Download the ZIP file**
    - Visit the GitHub repo: [https://github.com/chrstnglmtc/x-unfollower](https://github.com/chrstnglmtc/x-unfollower)
@@ -99,7 +99,7 @@ Until it’s published on the Chrome Web Store, you can load it manually.
 
 ### 📱 For Mobile (Android via Kiwi Browser)
 
-> ⚠️ Chrome on mobile **does not** support extensions. You must install and use [**Kiwi Browser**](https://play.google.com/store/apps/details?id=com.kiwibrowser.browser), which allows Chrome extensions on Android.
+> ⚠️ Chrome on mobile **does not** support extensions. You must install and use [**Kiwi Browser**](https://apkpure.com/kiwi-browser-fast-quiet/com.kiwibrowser.browser/download?_gl=1*9gm095*_ga*YW1wLTZTOWxsSkMzUzFTdXgyRHZjQWxtcUdYTnVjdnBhdGJtem9tSHJWWHFHdmVxNXppcW1reTk2Yi1YTFd4aWZaU0g), which allows Chrome extensions on Android.
 
 1. **Install Kiwi Browser**
    - Download it from the Google Play Store
