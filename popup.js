@@ -11,8 +11,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const unfollowBtn = document.getElementById("unfollowBtn");
   const userList = document.getElementById("userList");
   const countEl = document.getElementById("count");
+  const selectedCountEl = document.getElementById("selectedCount");
 
   sortSelect.disabled = true;
+
+  function updateSelectedCount() {
+    if (selectedCountEl) selectedCountEl.textContent = selectedUsernames.size;
+  }
 
   chrome.runtime.onMessage.addListener((msg) => {
     if (msg.type === "PROGRESS") {
@@ -39,12 +44,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadBtn.addEventListener("click", async () => {
     const limit = parseInt(limitSelect.value, 10) || 1000;
-    userList.innerHTML = `<i>Loading up to ${limit} accounts…</i>`;
+    const already = loadedUsers.length;
+    const resume = already > 0 && limit > already;
+
+    userList.innerHTML = `<i>${resume ? `Loading more (to ${limit})…` : `Loading up to ${limit} accounts…`}</i>`;
     sortSelect.disabled = true;
 
     try {
       const tab = await ensureConnected();
-      chrome.tabs.sendMessage(tab.id, { type: "LOAD_FOLLOWING", limit }, (data) => {
+      chrome.tabs.sendMessage(tab.id, { type: "LOAD_FOLLOWING", limit, resume }, (data) => {
         if (chrome.runtime.lastError) {
           userList.innerHTML = `<i>${chrome.runtime.lastError.message}</i>`;
           return;
@@ -52,14 +60,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const newUsers = Array.isArray(data) ? data : [];
 
-        // Merge new users with existing ones without duplicates
+        // Merge without duplicates
         const existingSet = new Set(loadedUsers.map(u => u.username));
-        newUsers.forEach(u => {
+        for (const u of newUsers) {
           if (!existingSet.has(u.username)) {
             loadedUsers.push(u);
             existingSet.add(u.username);
           }
-        });
+        }
 
         countEl.textContent = loadedUsers.length;
         applyFilter();
@@ -76,11 +84,13 @@ document.addEventListener("DOMContentLoaded", () => {
   selectAllBtn.addEventListener("click", () => {
     filteredUsers.forEach(u => selectedUsernames.add(u.username));
     render(filteredUsers);
+    updateSelectedCount();
   });
 
   unselectAllBtn.addEventListener("click", () => {
     filteredUsers.forEach(u => selectedUsernames.delete(u.username));
     render(filteredUsers);
+    updateSelectedCount();
   });
 
   unfollowBtn.addEventListener("click", async () => {
@@ -108,6 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
             toUnfollow.forEach(u => selectedUsernames.delete(u));
             countEl.textContent = loadedUsers.length;
             render(filteredUsers);
+            updateSelectedCount();
             alert(`Unfollowed ${res.count ?? 0} account(s).`);
           }
         }
@@ -136,29 +147,29 @@ document.addEventListener("DOMContentLoaded", () => {
         ${u.avatar 
           ? `<img class="avatar" src="${u.avatar}" alt="">` 
           : `<div class="avatar" 
-              style="
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                font-size:14px;
-                background-color:#ccc;
-                border-radius:50%;
-                color:#fff;
-              ">
-              😎
-            </div>`}
+               style="
+                 display:flex;
+                 align-items:center;
+                 justify-content:center;
+                 font-size:14px;
+                 background-color:#cbd5e1;
+                 border-radius:50%;
+                 color:#ffffff;
+                 border:1px solid #e5e7eb;
+               ">😎</div>`}
         <div class="meta">
           <div class="name">${escapeHtml(u.displayName || "")}</div>
           <div class="handle">@${u.username}</div>
         </div>
       </div>
-    `).join("");
+    ).trim()`).join("");
 
     document.querySelectorAll(".pick").forEach(cb => {
       cb.addEventListener("change", (e) => {
         const un = e.target.dataset.username;
         if (e.target.checked) selectedUsernames.add(un);
         else selectedUsernames.delete(un);
+        updateSelectedCount();
       });
     });
   }
