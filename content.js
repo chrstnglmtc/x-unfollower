@@ -3,7 +3,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const gqlCache = new Map();
 const domSeen  = new Map();
 let processedCells = new WeakSet();
-let targetBatchCount = 10000;
+let targetBatchCount = 500;
 
 window.addEventListener("message", (ev) => {
   const d = ev.data;
