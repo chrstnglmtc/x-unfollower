@@ -133,7 +133,20 @@ document.addEventListener("DOMContentLoaded", () => {
     userList.innerHTML = users.map(u => `
       <div class="row">
         <input type="checkbox" class="pick" data-username="${u.username}" ${selectedUsernames.has(u.username) ? "checked" : ""}>
-        ${u.avatar ? `<img class="avatar" src="${u.avatar}" alt="">` : `<div></div>`}
+        ${u.avatar 
+          ? `<img class="avatar" src="${u.avatar}" alt="">` 
+          : `<div class="avatar" 
+              style="
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:14px;
+                background-color:#ccc;
+                border-radius:50%;
+                color:#fff;
+              ">
+              😎
+            </div>`}
         <div class="meta">
           <div class="name">${escapeHtml(u.displayName || "")}</div>
           <div class="handle">@${u.username}</div>
