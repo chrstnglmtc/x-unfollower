@@ -3,39 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <title>X Unfollower</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="header">
-    <h3>X Unfollower V2</h3>
-    <div class="count"><span id="count">0</span> loaded</div>
-  </header>
+  <div class="shell">
+    <header class="header">
+      <h3>X Unfollower V2</h3>
+      <div class="count"><span id="count">0</span> loaded</div>
+    </header>
 
-  <section class="controls">
-    <label for="batchSize" class="label">Target total</label>
-    <select id="batchSize" class="select" title="Pick a higher number to load more on top of what's already loaded">
-      <option value="50">50</option>
-      <option value="100">100</option>
-      <option value="200">200</option>
-      <option value="500" selected>500</option>
-    </select>
+    <section class="controls">
+      <label for="batchSize" class="label">Target total</label>
+      <select id="batchSize" class="select" title="Pick a higher number to load more on top of what's already loaded">
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="200">200</option>
+        <option value="500" selected>500</option>
+      </select>
 
-    <button id="loadBtn" class="btn primary">Load / Load More</button>
+      <button id="loadBtn" class="btn primary">Load / Load More</button>
 
-    <label for="sortOption" class="label">Show</label>
-    <select id="sortOption" class="select" disabled>
-      <option value="all">All</option>
-      <option value="not-following-back">Not Following Back</option>
-    </select>
+      <label for="sortOption" class="label">Show</label>
+      <select id="sortOption" class="select" disabled>
+        <option value="all">All</option>
+        <option value="not-following-back">Not Following Back</option>
+      </select>
 
-    <button id="selectAllBtn" class="btn">Select All</button>
-    <button id="unselectAllBtn" class="btn">Unselect All</button>
-    <button id="unfollowBtn" class="btn danger">Unfollow Selected</button>
-  </section>
+      <button id="selectAllBtn" class="btn">Select All</button>
+      <button id="unselectAllBtn" class="btn">Unselect All</button>
+      <button id="unfollowBtn" class="btn danger">Unfollow Selected</button>
+    </section>
 
-  <section id="userList" class="list">
-    <i>Open your Following page, choose a target total, then click “Load / Load More”. Selecting a larger number later will continue loading on top of what’s already loaded.</i>
-  </section>
+    <section id="userList" class="list">
+      <i>Open your Following page, choose a target total, then click “Load / Load More”. Selecting a larger number later will continue loading on top of what’s already loaded.</i>
+    </section>
+  </div>
 
   <script src="popup.js"></script>
 </body>
