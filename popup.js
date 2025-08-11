@@ -5,11 +5,21 @@ let selectedUsernames = new Set();
 document.addEventListener("DOMContentLoaded", () => {
   const loadBtn = document.getElementById("loadBtn");
   const sortSelect = document.getElementById("sortOption");
+  const limitSelect = document.getElementById("batchSize");
   const selectAllBtn = document.getElementById("selectAllBtn");
   const unselectAllBtn = document.getElementById("unselectAllBtn");
   const unfollowBtn = document.getElementById("unfollowBtn");
   const userList = document.getElementById("userList");
   const countEl = document.getElementById("count");
+
+  sortSelect.disabled = true;
+
+  // ✅ Progress listener — updates live while content.js is loading
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (msg.type === "PROGRESS") {
+      countEl.textContent = msg.count || 0;
+    }
+  });
 
   async function ensureConnected() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -29,18 +39,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   loadBtn.addEventListener("click", async () => {
-    userList.innerHTML = "<i>Loading…</i>";
+    const limit = parseInt(limitSelect.value, 10) || 1000;
+    userList.innerHTML = `<i>Loading up to ${limit} accounts…</i>`;
+    sortSelect.disabled = true;
+
     try {
       const tab = await ensureConnected();
-      chrome.tabs.sendMessage(tab.id, { type: "LOAD_FOLLOWING", limit: 10000 }, (data) => {
+      chrome.tabs.sendMessage(tab.id, { type: "LOAD_FOLLOWING", limit }, (data) => {
         if (chrome.runtime.lastError) {
           userList.innerHTML = `<i>${chrome.runtime.lastError.message}</i>`;
           return;
         }
         loadedUsers = Array.isArray(data) ? data : [];
         selectedUsernames.clear();
-        countEl.textContent = loadedUsers.length; // show how many loaded
+        countEl.textContent = loadedUsers.length;
         applyFilter();
+        sortSelect.disabled = false;
       });
     } catch (e) {
       userList.innerHTML = `<i>${e.message}</i>`;

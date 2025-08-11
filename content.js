@@ -3,6 +3,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const gqlCache = new Map();
 const domSeen  = new Map();
 let processedCells = new WeakSet();
+let targetBatchCount = 10000;
 
 window.addEventListener("message", (ev) => {
   const d = ev.data;
@@ -85,44 +86,29 @@ function harvestVisibleCells() {
 }
 
 function getFollowingContainer() {
-  const primary = document.querySelector('[data-testid="primaryColumn"]');
-  if (primary && primary.scrollHeight > primary.clientHeight) return primary;
-  const region =
+  return (
     document.querySelector('[aria-label^="Timeline: Following"]') ||
-    document.querySelector('[aria-label*="Following"][role="region"]');
-  if (region && region.scrollHeight > region.clientHeight) return region;
-  return document.scrollingElement || document.documentElement || document.body;
+    document.querySelector('section[aria-labelledby^="accessible-list"]') ||
+    document.querySelector('[data-testid="primaryColumn"]') ||
+    document.scrollingElement
+  );
 }
 
 async function autoScrollFollowingRobust({
   targetCount = 10000,
-  stepPx = 1400,
-  maxIdleMs = 15000,
-  hardCapMs = 360000,
+  stepPx = 1200,
+  maxIdleMs = 12000,
+  hardCapMs = 300000,
   settleMs = 1500
 } = {}) {
+  targetBatchCount = targetCount;
   const container = getFollowingContainer();
   if (!container) throw new Error("Open your /following page first.");
-
   harvestVisibleCells();
+  chrome.runtime.sendMessage({ type: "PROGRESS", count: domSeen.size });
   let total = domSeen.size;
   let lastIncreaseAt = performance.now();
   const startAt = performance.now();
-
-  const getScrollTop = () =>
-    container === document.scrollingElement ? window.scrollY : container.scrollTop;
-  const getScrollHeight = () =>
-    container === document.scrollingElement
-      ? document.documentElement.scrollHeight
-      : container.scrollHeight;
-  const setScrollTop = (top) => {
-    if (container === document.scrollingElement) window.scrollTo({ top, behavior: "instant" });
-    else container.scrollTop = top;
-  };
-
-  let lastScrollTop = getScrollTop();
-  let lastScrollHeight = getScrollHeight();
-
   const observeTarget = container === document.scrollingElement ? document.body : container;
   const obs = new MutationObserver(() => {
     harvestVisibleCells();
@@ -130,86 +116,51 @@ async function autoScrollFollowingRobust({
     if (n > total) {
       total = n;
       lastIncreaseAt = performance.now();
+      chrome.runtime.sendMessage({ type: "PROGRESS", count: n });
     }
   });
   obs.observe(observeTarget, { childList: true, subtree: true });
 
-  const clickShowMoreIfPresent = () => {
+  function clickShowMoreIfPresent() {
     const btn = [...document.querySelectorAll('div[role="button"]')]
-      .find(b => /show more|more|see more/i.test((b.textContent || "").trim()));
+      .find(b => /show more|more|see more/i.test(b.textContent || ""));
     if (btn) btn.click();
-  };
-  const keyNudge = () => {
-    const ev = new KeyboardEvent("keydown", { key: "PageDown", code: "PageDown", bubbles: true });
-    (container === document.scrollingElement ? window : container).dispatchEvent(ev);
-  };
-  const wheelNudge = () => {
-    const ev = new WheelEvent("wheel", { deltaY: Math.max(600, stepPx / 2), bubbles: true, cancelable: true });
-    (container === document.scrollingElement ? window : container).dispatchEvent(ev);
-  };
-  const rafScrollStep = (px) =>
-    new Promise(resolve => {
-      const startTop = getScrollTop();
+  }
+
+  async function rafScrollStep(px) {
+    return new Promise(resolve => {
+      const startTop = container.scrollTop;
       const endTop = startTop + px;
+      const duration = 250;
       const t0 = performance.now();
-      const dur = 240;
       function tick(t) {
-        const p = Math.min(1, (t - t0) / dur);
-        setScrollTop(startTop + (endTop - startTop) * p);
+        const p = Math.min(1, (t - t0) / duration);
+        container.scrollTop = startTop + (endTop - startTop) * p;
         if (p < 1) requestAnimationFrame(tick);
         else resolve();
       }
       requestAnimationFrame(tick);
     });
-  const scrollLastCellIntoView = () => {
-    const lastCell = [...document.querySelectorAll('[data-testid="UserCell"]')].pop();
-    if (lastCell) lastCell.scrollIntoView({ block: "end" });
-  };
+  }
 
   while (true) {
-    const beforeCount = domSeen.size;
-    const beforeTop = getScrollTop();
-    const beforeHeight = getScrollHeight();
-
     await rafScrollStep(stepPx);
-    scrollLastCellIntoView();
-    wheelNudge();
-    keyNudge();
+    const lastCell = [...document.querySelectorAll('[data-testid="UserCell"]')].pop();
+    if (lastCell) lastCell.scrollIntoView({ block: "end" });
+    const wheel = new WheelEvent("wheel", { deltaY: Math.max(600, stepPx / 2), bubbles: true, cancelable: true });
+    container.dispatchEvent(wheel);
     clickShowMoreIfPresent();
-
-    await sleep(350);
+    await sleep(300);
     harvestVisibleCells();
+    chrome.runtime.sendMessage({ type: "PROGRESS", count: domSeen.size });
 
-    const afterCount = domSeen.size;
-    if (afterCount > total) {
-      total = afterCount;
-      lastIncreaseAt = performance.now();
-    }
-
-    const nowTop = getScrollTop();
-    const nowHeight = getScrollHeight();
-
-    if (nowTop === beforeTop && nowHeight === beforeHeight) {
-      await rafScrollStep(Math.floor(stepPx / 2));
-      wheelNudge();
-      await sleep(250);
-      harvestVisibleCells();
-      if (domSeen.size > total) {
-        total = domSeen.size;
-        lastIncreaseAt = performance.now();
-      }
-    }
+    if (domSeen.size >= targetCount) break;
 
     const now = performance.now();
     const idleFor = now - lastIncreaseAt;
-    const ranFor = now - startAt;
-
-    if (domSeen.size >= targetCount) break;
+    const ranFor  = now - startAt;
     if (idleFor >= maxIdleMs) break;
-    if (ranFor >= hardCapMs) break;
-
-    lastScrollTop = nowTop;
-    lastScrollHeight = nowHeight;
+    if (ranFor  >= hardCapMs) break;
   }
 
   await sleep(settleMs);
@@ -235,6 +186,7 @@ function mergeUsersFromCaches() {
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === "PING") { sendResponse({ ok: true }); return; }
+
   if (msg.type === "LOAD_FOLLOWING") {
     if (!/\/following(\/|\?|$)/.test(location.pathname)) { sendResponse([]); return; }
     (async () => {
@@ -245,8 +197,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         await autoScrollFollowingRobust({
           targetCount: msg.limit || 10000,
           stepPx: 1400,
-          maxIdleMs: 15000,
-          hardCapMs: 360000,
+          maxIdleMs: 12000,
+          hardCapMs: 300000,
           settleMs: 1500
         });
       } catch {}
@@ -256,6 +208,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     })();
     return true;
   }
+
   if (msg.type === "UNFOLLOW_USERS") {
     (async () => {
       let done = 0;
