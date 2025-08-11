@@ -1,9 +1,9 @@
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 const gqlCache = new Map();
-const domSeen  = new Map();
+const domSeen = new Map();
 let processedCells = new WeakSet();
-let targetBatchCount = 500;
+let targetBatchCount = 500; // default
 
 window.addEventListener("message", (ev) => {
   const d = ev.data;
@@ -95,7 +95,7 @@ function getFollowingContainer() {
 }
 
 async function autoScrollFollowingRobust({
-  targetCount = 10000,
+  targetCount = 500,
   stepPx = 1200,
   maxIdleMs = 12000,
   hardCapMs = 300000,
@@ -143,7 +143,7 @@ async function autoScrollFollowingRobust({
     });
   }
 
-  while (true) {
+  while (domSeen.size < targetCount) {
     await rafScrollStep(stepPx);
     const lastCell = [...document.querySelectorAll('[data-testid="UserCell"]')].pop();
     if (lastCell) lastCell.scrollIntoView({ block: "end" });
@@ -154,13 +154,11 @@ async function autoScrollFollowingRobust({
     harvestVisibleCells();
     chrome.runtime.sendMessage({ type: "PROGRESS", count: domSeen.size });
 
-    if (domSeen.size >= targetCount) break;
-
     const now = performance.now();
     const idleFor = now - lastIncreaseAt;
-    const ranFor  = now - startAt;
+    const ranFor = now - startAt;
     if (idleFor >= maxIdleMs) break;
-    if (ranFor  >= hardCapMs) break;
+    if (ranFor >= hardCapMs) break;
   }
 
   await sleep(settleMs);
@@ -190,12 +188,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === "LOAD_FOLLOWING") {
     if (!/\/following(\/|\?|$)/.test(location.pathname)) { sendResponse([]); return; }
     (async () => {
-      domSeen.clear();
-      gqlCache.clear();
+      // ⛔ DON'T clear domSeen here so we keep previous batch
       processedCells = new WeakSet();
       try {
         await autoScrollFollowingRobust({
-          targetCount: msg.limit || 10000,
+          targetCount: msg.limit || targetBatchCount,
           stepPx: 1400,
           maxIdleMs: 12000,
           hardCapMs: 300000,

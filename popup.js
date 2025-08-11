@@ -14,7 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   sortSelect.disabled = true;
 
-  // ✅ Progress listener — updates live while content.js is loading
   chrome.runtime.onMessage.addListener((msg) => {
     if (msg.type === "PROGRESS") {
       countEl.textContent = msg.count || 0;
@@ -50,8 +49,18 @@ document.addEventListener("DOMContentLoaded", () => {
           userList.innerHTML = `<i>${chrome.runtime.lastError.message}</i>`;
           return;
         }
-        loadedUsers = Array.isArray(data) ? data : [];
-        selectedUsernames.clear();
+
+        const newUsers = Array.isArray(data) ? data : [];
+
+        // Merge new users with existing ones without duplicates
+        const existingSet = new Set(loadedUsers.map(u => u.username));
+        newUsers.forEach(u => {
+          if (!existingSet.has(u.username)) {
+            loadedUsers.push(u);
+            existingSet.add(u.username);
+          }
+        });
+
         countEl.textContent = loadedUsers.length;
         applyFilter();
         sortSelect.disabled = false;
