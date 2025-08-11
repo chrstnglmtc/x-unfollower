@@ -147,22 +147,22 @@ document.addEventListener("DOMContentLoaded", () => {
         ${u.avatar 
           ? `<img class="avatar" src="${u.avatar}" alt="">` 
           : `<div class="avatar" 
-               style="
-                 display:flex;
-                 align-items:center;
-                 justify-content:center;
-                 font-size:14px;
-                 background-color:#cbd5e1;
-                 border-radius:50%;
-                 color:#ffffff;
-                 border:1px solid #e5e7eb;
-               ">😎</div>`}
+              style="
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:14px;
+                background-color:#cbd5e1;
+                border-radius:50%;
+                color:#ffffff;
+                border:1px solid #e5e7eb;
+              ">😎</div>`}
         <div class="meta">
           <div class="name">${escapeHtml(u.displayName || "")}</div>
           <div class="handle">@${u.username}</div>
         </div>
       </div>
-    ).trim()`).join("");
+    `).join("").trim();
 
     document.querySelectorAll(".pick").forEach(cb => {
       cb.addEventListener("change", (e) => {
