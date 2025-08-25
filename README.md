@@ -1,3 +1,8 @@
+# X Unfollower V2
+Check the latest version here:
+[X Unfollower V2](https://github.com/chrstnglmtc/x-unfollower/tree/v2.0)
+
+
 # X Unfollower V1
 
 A Chrome Extension to bulk manage your Following list on [x.com](https://x.com).
