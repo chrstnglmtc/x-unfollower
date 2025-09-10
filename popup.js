@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
         type: "LOAD_FOLLOWING",
         limit,
         resume,
-        exclude: loadedUsernames // 🆕 send to content.js
+        exclude: loadedUsers.map(u => u.username) 
       }, (data) => {
         if (chrome.runtime.lastError) {
           userList.innerHTML = `<i>${chrome.runtime.lastError.message}</i>`;
