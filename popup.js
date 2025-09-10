@@ -20,12 +20,28 @@ document.addEventListener("DOMContentLoaded", () => {
     if (selectedCountEl) selectedCountEl.textContent = selectedUsernames.size;
   }
 
-  function updateProgressBar(current) {
-  const max = currentTargetCount || 500;
-  const percent = Math.min(100, (current / max) * 100);
-  document.getElementById("progressBar").style.width = `${percent}%`;
-}
+  let indeterminateInterval;
 
+  function updateProgressBar(current) {
+    const bar = document.getElementById("progressBar");
+
+    if (currentTargetCount === Infinity) {
+      // 🔄 Indeterminate mode for ALL
+      bar.style.width = "30%";
+      bar.style.transition = "width 0.5s ease-in-out";
+
+      clearInterval(indeterminateInterval);
+      indeterminateInterval = setInterval(() => {
+        bar.style.width = bar.style.width === "30%" ? "80%" : "30%";
+      }, 1000);
+    } else {
+      // ✅ Normal mode
+      clearInterval(indeterminateInterval);
+      const max = currentTargetCount || 500;
+      const percent = Math.min(100, (current / max) * 100);
+      bar.style.width = `${percent}%`;
+    }
+  }
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.type === "PROGRESS") {
