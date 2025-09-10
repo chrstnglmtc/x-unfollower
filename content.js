@@ -107,7 +107,8 @@ async function autoScrollFollowingRobust({
   const container = getFollowingContainer();
   if (!container) throw new Error("Open your /following page first.");
 
-  if (!resume) domSeen.clear();
+  if (!resume || targetCount > domSeen.size) domSeen.clear();
+
   processedCells = new WeakSet();
 
   harvestVisibleCells(excluded);
