@@ -56,7 +56,7 @@ function harvestCell(el) {
   if (processedCells.has(el)) return;
   processedCells.add(el);
   const username = usernameFromCell(el);
-  if (!username) return;
+  if (!username || excluded.has(username)) return;
   const displayNameEl =
     el.querySelector('[data-testid="User-Name"] span') ||
     el.querySelector(`a[role="link"][href="/${username}"] span`);
@@ -80,9 +80,9 @@ function harvestCell(el) {
   }
 }
 
-function harvestVisibleCells() {
+function harvestVisibleCells(excluded = new Set()) {
   const cells = document.querySelectorAll('[data-testid="UserCell"]');
-  cells.forEach(harvestCell);
+  cells.forEach(el => harvestCell(el, excluded));
 }
 
 function getFollowingContainer() {
@@ -100,7 +100,8 @@ async function autoScrollFollowingRobust({
   maxIdleMs = 12000,
   hardCapMs = 300000,
   settleMs = 1500,
-  resume = false
+  resume = false,
+  excluded = new Set()
 } = {}) {
   targetBatchCount = targetCount;
   const container = getFollowingContainer();
@@ -109,7 +110,7 @@ async function autoScrollFollowingRobust({
   if (!resume) domSeen.clear();
   processedCells = new WeakSet();
 
-  harvestVisibleCells();
+  harvestVisibleCells(excluded);
   chrome.runtime.sendMessage({ type: "PROGRESS", count: domSeen.size });
 
   let total = domSeen.size;
@@ -120,7 +121,7 @@ async function autoScrollFollowingRobust({
 
   const observeTarget = container === document.scrollingElement ? document.body : container;
   const obs = new MutationObserver(() => {
-    harvestVisibleCells();
+    harvestVisibleCells(excluded);
     const n = domSeen.size;
     if (n > total) {
       total = n;
@@ -169,7 +170,7 @@ async function autoScrollFollowingRobust({
 
     await sleep(500);
 
-    harvestVisibleCells(); // Always reharvest
+    harvestVisibleCells(excluded); // Always reharvest
     chrome.runtime.sendMessage({ type: "PROGRESS", count: domSeen.size });
 
     const after = domSeen.size;
@@ -221,7 +222,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       return;
     }
     (async () => {
-      processedCells = new WeakSet(); // Don't reset domSeen on resume
+      processedCells = new WeakSet();
+      const excluded = new Set(msg.exclude || []); // 🆕
+
       try {
         await autoScrollFollowingRobust({
           targetCount: msg.limit || targetBatchCount,
@@ -229,15 +232,17 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           maxIdleMs: 12000,
           hardCapMs: 300000,
           settleMs: 1500,
-          resume: msg.resume || false
+          resume: msg.resume || false,
+          excluded // 🆕 pass to scroll
         });
       } catch {}
-      harvestVisibleCells();
+      harvestVisibleCells(excluded); // 🆕 respect excluded on final sweep
       const merged = mergeUsersFromCaches();
       sendResponse(merged);
     })();
     return true;
   }
+
 
   if (msg.type === "UNFOLLOW_USERS") {
     (async () => {

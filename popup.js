@@ -69,7 +69,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const tab = await ensureConnected();
-      chrome.tabs.sendMessage(tab.id, { type: "LOAD_FOLLOWING", limit, resume }, (data) => {
+      const loadedUsernames = loadedUsers.map(u => u.username); // 🆕
+
+      chrome.tabs.sendMessage(tab.id, {
+        type: "LOAD_FOLLOWING",
+        limit,
+        resume,
+        exclude: loadedUsernames // 🆕 send to content.js
+      }, (data) => {
         if (chrome.runtime.lastError) {
           userList.innerHTML = `<i>${chrome.runtime.lastError.message}</i>`;
           loadBtn.disabled = false;
@@ -78,7 +85,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const newUsers = Array.isArray(data) ? data : [];
 
-        // Merge without duplicates
         const existingSet = new Set(loadedUsers.map(u => u.username));
         let added = 0;
         for (const u of newUsers) {
@@ -93,14 +99,12 @@ document.addEventListener("DOMContentLoaded", () => {
         applyFilter();
         sortSelect.disabled = false;
 
-        // Show load more if not yet complete
         if (loadedUsers.length < limit && added > 0) {
           loadBtn.textContent = "🔁 Load More";
-          loadBtn.disabled = false;
         } else {
           loadBtn.textContent = "🔃 Reload All";
-          loadBtn.disabled = false;
         }
+        loadBtn.disabled = false;
       });
     } catch (e) {
       userList.innerHTML = `<i>${e.message}</i>`;
