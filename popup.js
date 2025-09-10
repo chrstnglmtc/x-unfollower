@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   loadBtn.addEventListener("click", async () => {
-    const limit = limitSelect.value === "all" ? Infinity : (parseInt(limitSelect.value, 10) || 1000);
+    const limit = limitSelect.value === "all" ? 10000 : parseInt(limitSelect.value, 10) || 1000;
     const already = loadedUsers.length;
     const resume = already > 0 && limit > already;
 
