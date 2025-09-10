@@ -158,6 +158,9 @@ async function autoScrollFollowingRobust({
 
   while (domSeen.size < targetCount && scrollAttempts < maxScrolls) {
     scrollAttempts++;
+
+    const beforeScroll = domSeen.size;
+
     await rafScrollStep(stepPx);
     const lastCell = [...document.querySelectorAll('[data-testid="UserCell"]')].pop();
     if (lastCell) lastCell.scrollIntoView({ block: "end" });
@@ -171,9 +174,12 @@ async function autoScrollFollowingRobust({
     const now = performance.now();
     const idleFor = now - lastIncreaseAt;
     const ranFor = now - startAt;
-    if ((idleFor >= maxIdleMs || ranFor >= hardCapMs) && scrollAttempts < 5) {
-      lastIncreaseAt = now; // reset idle time
-      continue; // try a few more times
+    const afterScroll = domSeen.size;
+    if (afterScroll === beforeScroll) noProgressAttempts++;
+    else noProgressAttempts = 0;
+
+    if ((idleFor >= maxIdleMs || ranFor >= hardCapMs || noProgressAttempts >= 4)) {
+      break;
     }
   }
 
