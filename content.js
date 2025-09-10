@@ -99,11 +99,16 @@ async function autoScrollFollowingRobust({
   stepPx = 1200,
   maxIdleMs = 12000,
   hardCapMs = 300000,
-  settleMs = 1500
+  settleMs = 1500,
+  resume = false
 } = {}) {
   targetBatchCount = targetCount;
   const container = getFollowingContainer();
   if (!container) throw new Error("Open your /following page first.");
+  if (!resume) {
+    domSeen.clear();           // 🔁 reset state only if NOT resuming
+    processedCells = new WeakSet();
+  }
   harvestVisibleCells();
   chrome.runtime.sendMessage({ type: "PROGRESS", count: domSeen.size });
 
@@ -199,7 +204,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           stepPx: 1400,
           maxIdleMs: 12000,
           hardCapMs: 300000,
-          settleMs: 1500
+          settleMs: 1500,
+          resume: msg.resume || false
         });
       } catch {}
       harvestVisibleCells();
