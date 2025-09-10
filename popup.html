@@ -15,6 +15,10 @@
       </div>
     </header>
 
+    <div class="progress-bar-container">
+      <div id="progressBar" class="progress-bar-fill"></div>
+    </div>
+
     <section class="controls">
       <label for="batchSize" class="label">Target total</label>
       <select id="batchSize" class="select" title="Pick a higher number to load more on top of what's already loaded">
@@ -22,6 +26,8 @@
         <option value="100">100</option>
         <option value="200">200</option>
         <option value="500" selected>500</option>
+        <option value="all">ALL</option>
+        
       </select>
 
       <button id="loadBtn" class="btn primary">Load / Load More</button>

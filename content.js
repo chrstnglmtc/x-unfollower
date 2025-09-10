@@ -106,6 +106,7 @@ async function autoScrollFollowingRobust({
   if (!container) throw new Error("Open your /following page first.");
   harvestVisibleCells();
   chrome.runtime.sendMessage({ type: "PROGRESS", count: domSeen.size });
+
   let total = domSeen.size;
   let lastIncreaseAt = performance.now();
   const startAt = performance.now();
@@ -143,7 +144,11 @@ async function autoScrollFollowingRobust({
     });
   }
 
-  while (domSeen.size < targetCount) {
+  let scrollAttempts = 0;
+  const maxScrolls = targetCount === Infinity ? 1000 : Infinity;
+
+  while (domSeen.size < targetCount && scrollAttempts < maxScrolls) {
+    scrollAttempts++;
     await rafScrollStep(stepPx);
     const lastCell = [...document.querySelectorAll('[data-testid="UserCell"]')].pop();
     if (lastCell) lastCell.scrollIntoView({ block: "end" });
@@ -157,8 +162,7 @@ async function autoScrollFollowingRobust({
     const now = performance.now();
     const idleFor = now - lastIncreaseAt;
     const ranFor = now - startAt;
-    if (idleFor >= maxIdleMs) break;
-    if (ranFor >= hardCapMs) break;
+    if (idleFor >= maxIdleMs || ranFor >= hardCapMs) break;
   }
 
   await sleep(settleMs);
@@ -188,8 +192,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === "LOAD_FOLLOWING") {
     if (!/\/following(\/|\?|$)/.test(location.pathname)) { sendResponse([]); return; }
     (async () => {
-      // ⛔ DON'T clear domSeen here so we keep previous batch
-      processedCells = new WeakSet();
+      processedCells = new WeakSet(); // Don't reset domSeen
       try {
         await autoScrollFollowingRobust({
           targetCount: msg.limit || targetBatchCount,

@@ -7,6 +7,22 @@ body {
   background: #fff;
 }
 
+.progress-bar-container {
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  margin: 8px 0 12px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background-color: #1da1f2;
+  transition: width 0.25s ease;
+}
+
+
 .shell {
   max-width: 420px;
   margin: 0 auto;

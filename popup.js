@@ -19,9 +19,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (selectedCountEl) selectedCountEl.textContent = selectedUsernames.size;
   }
 
-  chrome.runtime.onMessage.addListener((msg) => {
+  function updateProgressBar(current) {
+  const max = currentTargetCount || 500;
+  const percent = Math.min(100, (current / max) * 100);
+  document.getElementById("progressBar").style.width = `${percent}%`;
+}
+
+
+  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.type === "PROGRESS") {
-      countEl.textContent = msg.count || 0;
+      count.textContent = msg.count;
+      updateProgressBar(msg.count);
+    }
+
+    if (msg.type === "SHOW_DONE") {
+      alert(`✅ Unfollowed ${msg.count} users.`);
     }
   });
 
@@ -43,9 +55,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   loadBtn.addEventListener("click", async () => {
-    const limit = parseInt(limitSelect.value, 10) || 1000;
+    const limit = limitSelect.value === "all" ? Infinity : (parseInt(limitSelect.value, 10) || 1000);
     const already = loadedUsers.length;
     const resume = already > 0 && limit > already;
+
+    currentTargetCount = limit;
+    updateProgressBar(0);
 
     userList.innerHTML = `<i>${resume ? `Loading more (to ${limit})…` : `Loading up to ${limit} accounts…`}</i>`;
     sortSelect.disabled = true;
