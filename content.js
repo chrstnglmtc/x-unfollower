@@ -52,7 +52,7 @@ function usernameFromCell(el) {
   return null;
 }
 
-function harvestCell(el) {
+function harvestCell(el, excluded = new Set()) {
   if (processedCells.has(el)) return;
   processedCells.add(el);
   const username = usernameFromCell(el);
@@ -170,7 +170,7 @@ async function autoScrollFollowingRobust({
 
     await sleep(500);
 
-    harvestVisibleCells(excluded); // Always reharvest
+    harvestVisibleCells(excluded);
     chrome.runtime.sendMessage({ type: "PROGRESS", count: domSeen.size });
 
     const after = domSeen.size;
@@ -223,8 +223,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
     (async () => {
       processedCells = new WeakSet();
-      const excluded = new Set(msg.exclude || []); // 🆕
-
+      const excluded = new Set(msg.exclude || []);
       try {
         await autoScrollFollowingRobust({
           targetCount: msg.limit || targetBatchCount,
@@ -233,16 +232,15 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           hardCapMs: 300000,
           settleMs: 1500,
           resume: msg.resume || false,
-          excluded // 🆕 pass to scroll
+          excluded
         });
       } catch {}
-      harvestVisibleCells(excluded); // 🆕 respect excluded on final sweep
+      harvestVisibleCells(excluded);
       const merged = mergeUsersFromCaches();
       sendResponse(merged);
     })();
     return true;
   }
-
 
   if (msg.type === "UNFOLLOW_USERS") {
     (async () => {
