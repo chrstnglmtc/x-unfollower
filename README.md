@@ -12,15 +12,20 @@ All processing happens locally in your browser. No data is collected or sent to 
 
 ## ✨ Features
 
-* Load your Following list directly from x.com
+* Load your Following list directly from x.com  
 * Filter view:
-
   * **All** accounts
   * **Not Following Back**
 * Select individual accounts or **Select All / Unselect All**
 * Bulk unfollow selected accounts
 * Compact list view with profile picture, display name, and username
 * Shows how many accounts are loaded
+* **Progress bar with two modes**:
+  * **Normal mode**: Updates as a percentage when a specific limit (e.g. 500, 1000) is chosen  
+  * **Indeterminate mode**: Smooth animation when loading **ALL**, until scrolling is complete
+* Display **"Follows you"** beside accounts that follow you back
+* Resume-mode loading: continue from where you left off when clicking **Load More**
+* Avoids duplicates across multiple loading batches
 
 ---
 
@@ -31,7 +36,7 @@ Until it’s published on the Chrome Web Store, you can load it manually.
 ### 💻 For PC (Windows, macOS, Linux)
 
 1. **Download the ZIP file**
-   - Go to the GitHub repo: https://github.com/chrstnglmtc/x-unfollower/tree/v2.0
+   - Go to the GitHub repo: https://github.com/chrstnglmtc/x-unfollower/tree/v3.0
    - Click **"Code" > "Download ZIP"**
    - Extract the ZIP
 
@@ -43,7 +48,7 @@ Until it’s published on the Chrome Web Store, you can load it manually.
 
 4. **Load Unpacked Extension**
    - Click **"Load unpacked"**
-   - Select the content of the extracted folder. (e.g., `x-unfollower-v2.0`)
+   - Select the content of the extracted folder. (e.g., `x-unfollower-v3.0`)
 
 5. You should now see **** in your extensions.
 
@@ -57,7 +62,7 @@ Until it’s published on the Chrome Web Store, you can load it manually.
    - Download it here: [**Kiwi Browser**](https://apkpure.com/kiwi-browser-fast-quiet/com.kiwibrowser.browser/download?_gl=1*9gm095*_ga*YW1wLTZTOWxsSkMzUzFTdXgyRHZjQWxtcUdYTnVjdnBhdGJtem9tSHJWWHFHdmVxNXppcW1reTk2Yi1YTFd4aWZaU0g)
 
 2. **Download the ZIP file**
-   - Visit the GitHub repo: [https://github.com/chrstnglmtc/x-unfollower](https://github.com/chrstnglmtc/x-unfollower)
+   - Visit the GitHub repo (Make sure it's V3): [https://github.com/chrstnglmtc/x-unfollower/tree/v3.0](https://github.com/chrstnglmtc/x-unfollower/tree/v3.0)
    - Tap **"Code" > "Download ZIP"**
    - Use a file manager app to extract the ZIP
 
