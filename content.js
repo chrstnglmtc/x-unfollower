@@ -106,9 +106,13 @@ async function autoScrollFollowingRobust({
   const container = getFollowingContainer();
   if (!container) throw new Error("Open your /following page first.");
   if (!resume) {
-    domSeen.clear();           // 🔁 reset state only if NOT resuming
+    domSeen.clear();
+    processedCells = new WeakSet();
+  } else {
+    // Still reset processedCells so we recheck visible DOM
     processedCells = new WeakSet();
   }
+
   harvestVisibleCells();
   chrome.runtime.sendMessage({ type: "PROGRESS", count: domSeen.size });
 
@@ -167,7 +171,10 @@ async function autoScrollFollowingRobust({
     const now = performance.now();
     const idleFor = now - lastIncreaseAt;
     const ranFor = now - startAt;
-    if (idleFor >= maxIdleMs || ranFor >= hardCapMs) break;
+    if ((idleFor >= maxIdleMs || ranFor >= hardCapMs) && scrollAttempts < 5) {
+      lastIncreaseAt = now; // reset idle time
+      continue; // try a few more times
+    }
   }
 
   await sleep(settleMs);

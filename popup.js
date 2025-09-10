@@ -1,6 +1,7 @@
 let loadedUsers = [];
 let filteredUsers = [];
 let selectedUsernames = new Set();
+let currentTargetCount = 500;
 
 document.addEventListener("DOMContentLoaded", () => {
   const loadBtn = document.getElementById("loadBtn");
@@ -62,14 +63,16 @@ document.addEventListener("DOMContentLoaded", () => {
     currentTargetCount = limit;
     updateProgressBar(0);
 
-    userList.innerHTML = `<i>${resume ? `Loading more (to ${limit})…` : `Loading up to ${limit} accounts…`}</i>`;
+    userList.innerHTML = `<i>${resume ? `🔄 Loading more (up to ${limit})…` : `📥 Loading up to ${limit} accounts…`}</i>`;
     sortSelect.disabled = true;
+    loadBtn.disabled = true;
 
     try {
       const tab = await ensureConnected();
       chrome.tabs.sendMessage(tab.id, { type: "LOAD_FOLLOWING", limit, resume }, (data) => {
         if (chrome.runtime.lastError) {
           userList.innerHTML = `<i>${chrome.runtime.lastError.message}</i>`;
+          loadBtn.disabled = false;
           return;
         }
 
@@ -77,20 +80,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Merge without duplicates
         const existingSet = new Set(loadedUsers.map(u => u.username));
+        let added = 0;
         for (const u of newUsers) {
           if (!existingSet.has(u.username)) {
             loadedUsers.push(u);
             existingSet.add(u.username);
+            added++;
           }
         }
 
         countEl.textContent = loadedUsers.length;
         applyFilter();
         sortSelect.disabled = false;
+
+        // Show load more if not yet complete
+        if (loadedUsers.length < limit && added > 0) {
+          loadBtn.textContent = "🔁 Load More";
+          loadBtn.disabled = false;
+        } else {
+          loadBtn.textContent = "🔃 Reload All";
+          loadBtn.disabled = false;
+        }
       });
     } catch (e) {
       userList.innerHTML = `<i>${e.message}</i>`;
       countEl.textContent = "0";
+      loadBtn.disabled = false;
     }
   });
 
