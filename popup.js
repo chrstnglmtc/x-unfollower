@@ -193,7 +193,10 @@ document.addEventListener("DOMContentLoaded", () => {
               ">😎</div>`}
         <div class="meta">
           <div class="name">${escapeHtml(u.displayName || "")}</div>
-          <div class="handle">@${u.username}</div>
+          <div class="handle">
+            @${u.username}
+            ${u.followsBack ? `<span class="follows-back">Follows you</span>` : ""}
+          </div>
         </div>
       </div>
     `).join("").trim();

@@ -22,6 +22,15 @@ body {
   transition: width 0.25s ease;
 }
 
+.follows-back {
+  margin-left: 6px;
+  padding: 1px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #16a34a;
+  border: 1px solid #16a34a;
+  border-radius: 4px;
+}
 
 .shell {
   max-width: 420px;
