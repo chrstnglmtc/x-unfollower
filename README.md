@@ -1,3 +1,8 @@
+# X Unfollower V3
+Check the latest version here:
+[X Unfollower V2](https://github.com/chrstnglmtc/x-unfollower/tree/v3.0)
+
+
 # X Unfollower V2
 Check the latest version here:
 [X Unfollower V2](https://github.com/chrstnglmtc/x-unfollower/tree/v2.0)
