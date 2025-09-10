@@ -1,4 +1,4 @@
-# X Unfollower V2
+# X Unfollower V3
 
 A Chrome Extension to bulk manage your Following list on [x.com](https://x.com).
 You can **load your Following list**, filter by **Not Following Back**, select accounts, and unfollow them in bulk.
