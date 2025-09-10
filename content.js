@@ -56,7 +56,8 @@ function harvestCell(el, excluded = new Set()) {
   if (processedCells.has(el)) return;
   processedCells.add(el);
   const username = usernameFromCell(el);
-  if (!username || excluded.has(username)) return;
+  if (!username) return;
+  if (!processedCells.has(el) && excluded.has(username)) return;
   const displayNameEl =
     el.querySelector('[data-testid="User-Name"] span') ||
     el.querySelector(`a[role="link"][href="/${username}"] span`);
