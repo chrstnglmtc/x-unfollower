@@ -3,7 +3,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const gqlCache = new Map();
 const domSeen = new Map();
 let processedCells = new WeakSet();
-let targetBatchCount = 500; // default
+let targetBatchCount = 500;
 
 window.addEventListener("message", (ev) => {
   const d = ev.data;
@@ -105,13 +105,9 @@ async function autoScrollFollowingRobust({
   targetBatchCount = targetCount;
   const container = getFollowingContainer();
   if (!container) throw new Error("Open your /following page first.");
-  if (!resume) {
-    domSeen.clear();
-    processedCells = new WeakSet();
-  } else {
-    // Still reset processedCells so we recheck visible DOM
-    processedCells = new WeakSet();
-  }
+
+  if (!resume) domSeen.clear();
+  processedCells = new WeakSet();
 
   harvestVisibleCells();
   chrome.runtime.sendMessage({ type: "PROGRESS", count: domSeen.size });
@@ -119,6 +115,9 @@ async function autoScrollFollowingRobust({
   let total = domSeen.size;
   let lastIncreaseAt = performance.now();
   const startAt = performance.now();
+  let scrollAttempts = 0;
+  let noProgressCount = 0;
+
   const observeTarget = container === document.scrollingElement ? document.body : container;
   const obs = new MutationObserver(() => {
     harvestVisibleCells();
@@ -153,32 +152,38 @@ async function autoScrollFollowingRobust({
     });
   }
 
-  let scrollAttempts = 0;
-  const maxScrolls = targetCount === Infinity ? 1000 : Infinity;
-
-  while (domSeen.size < targetCount && scrollAttempts < maxScrolls) {
+  while (domSeen.size < targetCount && scrollAttempts < 200) {
     scrollAttempts++;
 
-    const beforeScroll = domSeen.size;
+    const before = domSeen.size;
 
     await rafScrollStep(stepPx);
+
     const lastCell = [...document.querySelectorAll('[data-testid="UserCell"]')].pop();
     if (lastCell) lastCell.scrollIntoView({ block: "end" });
-    const wheel = new WheelEvent("wheel", { deltaY: Math.max(600, stepPx / 2), bubbles: true, cancelable: true });
+
+    const wheel = new WheelEvent("wheel", { deltaY: stepPx, bubbles: true, cancelable: true });
     container.dispatchEvent(wheel);
+
     clickShowMoreIfPresent();
-    await sleep(300);
-    harvestVisibleCells();
+
+    await sleep(500);
+
+    harvestVisibleCells(); // Always reharvest
     chrome.runtime.sendMessage({ type: "PROGRESS", count: domSeen.size });
 
-    const now = performance.now();
-    const idleFor = now - lastIncreaseAt;
-    const ranFor = now - startAt;
-    const afterScroll = domSeen.size;
-    if (afterScroll === beforeScroll) noProgressAttempts++;
-    else noProgressAttempts = 0;
+    const after = domSeen.size;
+    if (after === before) {
+      noProgressCount++;
+    } else {
+      noProgressCount = 0;
+      lastIncreaseAt = performance.now();
+    }
 
-    if ((idleFor >= maxIdleMs || ranFor >= hardCapMs || noProgressAttempts >= 4)) {
+    const idleFor = performance.now() - lastIncreaseAt;
+    const ranFor = performance.now() - startAt;
+
+    if (idleFor > maxIdleMs || ranFor > hardCapMs || noProgressCount >= 5) {
       break;
     }
   }
@@ -205,12 +210,18 @@ function mergeUsersFromCaches() {
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.type === "PING") { sendResponse({ ok: true }); return; }
+  if (msg.type === "PING") {
+    sendResponse({ ok: true });
+    return;
+  }
 
   if (msg.type === "LOAD_FOLLOWING") {
-    if (!/\/following(\/|\?|$)/.test(location.pathname)) { sendResponse([]); return; }
+    if (!/\/following(\/|\?|$)/.test(location.pathname)) {
+      sendResponse([]);
+      return;
+    }
     (async () => {
-      processedCells = new WeakSet(); // Don't reset domSeen
+      processedCells = new WeakSet(); // Don't reset domSeen on resume
       try {
         await autoScrollFollowingRobust({
           targetCount: msg.limit || targetBatchCount,
@@ -241,7 +252,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         btn.click();
         await sleep(350);
         const confirm = document.querySelector('[data-testid="confirmationSheetConfirm"]') ||
-                        [...document.querySelectorAll('div[role="button"]')].find(b => /Unfollow/i.test(b.textContent||""));
+                        [...document.querySelectorAll('div[role="button"]')].find(b => /Unfollow/i.test(b.textContent || ""));
         if (confirm) confirm.click();
         done++;
         await sleep(900 + Math.random() * 600);
